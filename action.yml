@@ -1,11 +1,11 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Setup babashka'
+description: 'Provision hosted runner with a babashka'
+author: 'Ilshat Sultanov'
 inputs:
-  milliseconds: # change this
+  version:
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+    description: 'A desired version of babashka to install'
+    default: '0.2.10'
 runs:
   using: 'node12'
   main: 'dist/index.js'
