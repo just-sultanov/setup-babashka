@@ -1,8 +1,8 @@
 {
-  "name": "typescript-action",
-  "version": "0.0.0",
+  "name": "setup-babashka",
+  "version": "0.0.1",
   "private": true,
-  "description": "TypeScript template action",
+  "description": "Setup babashka action",
   "main": "lib/main.js",
   "scripts": {
     "build": "tsc",
@@ -15,17 +15,19 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/actions/typescript-action.git"
+    "url": "git+https://github.com/just-sultanov/setup-babashka.git"
   },
   "keywords": [
     "actions",
     "node",
-    "setup"
+    "setup",
+    "babashka"
   ],
-  "author": "",
+  "author": "Ilshat Sultanov",
   "license": "MIT",
   "dependencies": {
-    "@actions/core": "^1.2.6"
+    "@actions/core": "^1.2.6",
+    "@actions/tool-cache": "^1.6.1"
   },
   "devDependencies": {
     "@types/jest": "^26.0.20",
