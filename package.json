@@ -1,6 +1,6 @@
 {
   "name": "setup-babashka",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "private": true,
   "description": "Setup babashka action",
   "main": "lib/main.js",
