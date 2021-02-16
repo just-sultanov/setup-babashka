@@ -2,7 +2,7 @@ require('./sourcemap-register.js');module.exports =
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 664:
+/***/ 480:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -38,36 +38,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.setup = void 0;
 const path = __importStar(__nccwpck_require__(622));
-const os = __importStar(__nccwpck_require__(87));
-const core = __importStar(__nccwpck_require__(186));
-const tc = __importStar(__nccwpck_require__(784));
-const error = (msg, err) => {
-    core.setFailed(msg);
-    core.error(err);
-    process.exit(1);
-};
-const setup = ({ version }) => __awaiter(void 0, void 0, void 0, function* () {
-    const installDir = path.join(os.homedir(), 'bin');
-    const toolName = 'babashka';
-    const archiveName = `babashka-${version}-linux-static-amd64.zip`;
-    const archiveUrl = `https://github.com/babashka/babashka/releases/download/v${version}/${archiveName}`;
-    core.info(`Downloading file from ${archiveUrl}`);
-    const archiveDir = yield tc
-        .downloadTool(archiveUrl)
-        // eslint-disable-next-line github/no-then
-        .catch(err => error('Failed to download file', err));
-    core.info(`Extracting ${archiveDir} into ${installDir}`);
-    const extractedDir = yield tc
-        .extractZip(archiveDir, path.join(installDir, toolName))
-        // eslint-disable-next-line github/no-then
-        .catch(err => error('Failed to extract file', err));
-    core.info(`Caching ${extractedDir} directory`);
-    yield tc
-        .cacheDir(extractedDir, toolName, version)
-        // eslint-disable-next-line github/no-then
-        .catch(err => error(`Failed to cache ${extractedDir} directory`, err));
-    core.info(`Add ${extractedDir} to PATH`);
-    core.addPath(extractedDir);
+const utils = __importStar(__nccwpck_require__(918));
+const setup = (params) => __awaiter(void 0, void 0, void 0, function* () {
+    const { installDir, toolName, version } = params;
+    const archiveUrl = utils.getArtifactUrl(params);
+    const archiveDir = yield utils.download(archiveUrl);
+    const extractedDir = yield utils.extract(archiveDir, path.join(installDir, toolName));
+    yield utils.cache(extractedDir, toolName, version);
+    utils.addPath(extractedDir);
 });
 exports.setup = setup;
 
@@ -100,25 +78,129 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(186));
+const installer = __importStar(__nccwpck_require__(480));
+const utils = __importStar(__nccwpck_require__(918));
+const platform = process.platform;
+const installDir = utils.getInstallDir();
+const toolName = 'babashka';
+const version = core.getInput('version', { required: true }) || '0.2.10';
+utils.attemptToInstallFromCache(toolName, version);
+const params = { platform, installDir, toolName, version };
+core.info(`Setup babashka ${version}`);
+installer.setup(params);
+
+
+/***/ }),
+
+/***/ 918:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.exit = exports.addPath = exports.cache = exports.attemptToInstallFromCache = exports.extract = exports.download = exports.error = exports.getArtifactUrl = exports.getArtifactName = exports.getInstallDir = void 0;
+const core = __importStar(__nccwpck_require__(186));
 const tc = __importStar(__nccwpck_require__(784));
-const ubuntu = __importStar(__nccwpck_require__(664));
-const version = core.getInput('version', { required: true });
-const cachePath = tc.find('babashka', version);
-if (cachePath !== '') {
-    core.addPath(cachePath);
-    process.exit(0);
-}
-const params = { version };
-switch (process.platform) {
-    case 'win32':
-        core.warning('Unfortunately, the Windows platform is not currently supported');
-        break;
-    case 'darwin':
-        core.warning('Unfortunately, the macOS platform is not currently supported');
-        break;
-    default:
-        ubuntu.setup(params);
-}
+const path = __importStar(__nccwpck_require__(622));
+const os = __importStar(__nccwpck_require__(87));
+const getInstallDir = () => {
+    return path.join(os.homedir(), 'bin');
+};
+exports.getInstallDir = getInstallDir;
+const getArtifactName = (platform, version) => {
+    switch (platform) {
+        case 'win32':
+            return `babashka-${version}-windows-amd64.zip`;
+        case 'darwin':
+            return `babashka-${version}-macos-amd64.zip`;
+        default:
+            return `babashka-${version}-linux-static-amd64.zip`;
+    }
+};
+exports.getArtifactName = getArtifactName;
+const getArtifactUrl = ({ platform, version }) => {
+    const archiveName = exports.getArtifactName(platform, version);
+    return `https://github.com/babashka/babashka/releases/download/v${version}/${archiveName}`;
+};
+exports.getArtifactUrl = getArtifactUrl;
+const error = (msg, err) => {
+    core.setFailed(msg);
+    core.error(err);
+    process.exit(1);
+};
+exports.error = error;
+const download = (url) => __awaiter(void 0, void 0, void 0, function* () {
+    core.info(`Downloading file from ${url}`);
+    return yield tc
+        .downloadTool(url)
+        // eslint-disable-next-line github/no-then
+        .catch(err => exports.error('Failed to download file', err));
+});
+exports.download = download;
+const extract = (source, destination) => __awaiter(void 0, void 0, void 0, function* () {
+    core.info(`Extracting ${source} into ${destination}`);
+    return yield tc
+        .extractZip(source, destination)
+        // eslint-disable-next-line github/no-then
+        .catch(err => exports.error('Failed to extract file', err));
+});
+exports.extract = extract;
+const attemptToInstallFromCache = (toolName, version) => {
+    core.info(`Search ${toolName} ${version} in the cache`);
+    const cachePath = tc.find(toolName, version);
+    if (cachePath !== '') {
+        core.info(`${toolName} ${version} is found in the cache`);
+        exports.addPath(cachePath);
+        exports.exit(0);
+    }
+};
+exports.attemptToInstallFromCache = attemptToInstallFromCache;
+const cache = (source, toolName, version) => __awaiter(void 0, void 0, void 0, function* () {
+    core.info(`Caching ${source} directory`);
+    return yield tc
+        .cacheDir(source, toolName, version)
+        // eslint-disable-next-line github/no-then
+        .catch(err => exports.error(`Failed to cache ${source} directory`, err));
+});
+exports.cache = cache;
+const addPath = (source) => {
+    core.info(`Add ${source} to PATH`);
+    core.addPath(source);
+    return source;
+};
+exports.addPath = addPath;
+const exit = (code) => {
+    process.exit(code);
+};
+exports.exit = exit;
 
 
 /***/ }),

@@ -1,28 +1,17 @@
 import * as core from '@actions/core'
-import * as tc from '@actions/tool-cache'
 
-import * as ubuntu from './installers/ubuntu'
+import * as installer from './installer'
+import * as utils from './utils'
 
-const version = core.getInput('version', {required: true})
+const platform = process.platform
+const installDir = utils.getInstallDir()
+const toolName = 'babashka'
+const version = core.getInput('version', {required: true}) || '0.2.10'
 
-const cachePath = tc.find('babashka', version)
+utils.attemptToInstallFromCache(toolName, version)
 
-if (cachePath !== '') {
-  core.addPath(cachePath)
-  process.exit(0)
-}
+const params = {platform, installDir, toolName, version}
 
-const params = {version}
+core.info(`Setup babashka ${version}`)
 
-switch (process.platform) {
-  case 'win32':
-    core.warning(
-      'Unfortunately, the Windows platform is not currently supported'
-    )
-    break
-  case 'darwin':
-    core.warning('Unfortunately, the macOS platform is not currently supported')
-    break
-  default:
-    ubuntu.setup(params)
-}
+installer.setup(params)
