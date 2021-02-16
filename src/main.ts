@@ -1,19 +1,28 @@
 import * as core from '@actions/core'
-import {wait} from './wait'
+import * as tc from '@actions/tool-cache'
 
-async function run(): Promise<void> {
-  try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
+import * as ubuntu from './installers/ubuntu'
 
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
+const version = core.getInput('version', {required: true})
 
-    core.setOutput('time', new Date().toTimeString())
-  } catch (error) {
-    core.setFailed(error.message)
-  }
+const cachePath = tc.find('babashka', version)
+
+if (cachePath !== '') {
+  core.addPath(cachePath)
+  process.exit(0)
 }
 
-run()
+const params = {version}
+
+switch (process.platform) {
+  case 'win32':
+    core.warning(
+      'Unfortunately, the Windows platform is not currently supported'
+    )
+    break
+  case 'darwin':
+    core.warning('Unfortunately, the macOS platform is not currently supported')
+    break
+  default:
+    ubuntu.setup(params)
+}
