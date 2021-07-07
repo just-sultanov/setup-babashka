@@ -22,7 +22,7 @@ jobs:
       - name: Install babashka (from repo)
         uses: ./
         with:
-          version: 0.2.10
+          version: 0.4.6
 
       - name: Run babashka
         run: bb --version
@@ -30,7 +30,7 @@ jobs:
       - name: Install babashka (from cache)
         uses: ./
         with:
-          version: 0.2.10
+          version: 0.4.6
 
       - name: Run babashka
         run: bb --version
