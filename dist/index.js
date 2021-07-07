@@ -140,9 +140,9 @@ const getArtifactName = (platform, version) => {
         case 'win32':
             return `babashka-${version}-windows-amd64.zip`;
         case 'darwin':
-            return `babashka-${version}-macos-amd64.zip`;
+            return `babashka-${version}-macos-amd64.tar.gz`;
         default:
-            return `babashka-${version}-linux-static-amd64.zip`;
+            return `babashka-${version}-linux-amd64-static.tar.gz`;
     }
 };
 exports.getArtifactName = getArtifactName;
@@ -167,8 +167,14 @@ const download = (url) => __awaiter(void 0, void 0, void 0, function* () {
 exports.download = download;
 const extract = (source, destination) => __awaiter(void 0, void 0, void 0, function* () {
     core.info(`Extracting ${source} into ${destination}`);
+    if (destination.endsWith('.zip')) {
+        return yield tc
+            .extractZip(source, destination)
+            // eslint-disable-next-line github/no-then
+            .catch(err => exports.error('Failed to extract file', err));
+    }
     return yield tc
-        .extractZip(source, destination)
+        .extractTar(source, destination)
         // eslint-disable-next-line github/no-then
         .catch(err => exports.error('Failed to extract file', err));
 });
