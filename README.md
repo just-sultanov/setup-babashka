@@ -15,9 +15,9 @@ See [action.yml](action.yml)
 steps:
   # ...
   - name: Install babashka
-    uses: just-sultanov/setup-babashka@v1
+    uses: just-sultanov/setup-babashka@v2
     with:
-      version: '0.2.10'
+      version: '0.4.6'
 
   - name: Run babashka
     run: bb --version
