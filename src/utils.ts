@@ -15,9 +15,9 @@ export const getArtifactName = (platform: string, version: string): string => {
     case 'win32':
       return `babashka-${version}-windows-amd64.zip`
     case 'darwin':
-      return `babashka-${version}-macos-amd64.zip`
+      return `babashka-${version}-macos-amd64.tar.gz`
     default:
-      return `babashka-${version}-linux-static-amd64.zip`
+      return `babashka-${version}-linux-amd64-static.tar.gz`
   }
 }
 
@@ -45,8 +45,14 @@ export const extract = async (
   destination: string
 ): Promise<string> => {
   core.info(`Extracting ${source} into ${destination}`)
+  if (destination.endsWith('.zip')) {
+    return await tc
+      .extractZip(source, destination)
+      // eslint-disable-next-line github/no-then
+      .catch(err => error('Failed to extract file', err))
+  }
   return await tc
-    .extractZip(source, destination)
+    .extractTar(source, destination)
     // eslint-disable-next-line github/no-then
     .catch(err => error('Failed to extract file', err))
 }
